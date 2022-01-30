@@ -1,4 +1,5 @@
 import 'package:cityscope/models/blog_model.dart';
+import 'package:cityscope/screens/home/comment_screen.dart';
 import 'package:cityscope/services/core/blog_services.dart';
 import 'package:cityscope/widgets/loading_widget.dart';
 import 'package:flutter/material.dart';
@@ -55,6 +56,26 @@ class _BlogScreenState extends State<BlogScreen> {
       });
     }
 
+    Future<void> handleAddComment(String comment) async {
+      BlogModel data = await commentBlog(
+        blogId: widget.blogId,
+        comment: comment,
+      );
+
+      setState(() {
+        blog = data;
+        isLoading = false;
+      });
+
+      Navigator.of(context).pop();
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (_) =>
+              CommentScreen(blog: blog!, handleAddComment: handleAddComment),
+        ),
+      );
+    }
+
     if (isLoading) {
       return const LoadingIndicator();
     }
@@ -66,23 +87,45 @@ class _BlogScreenState extends State<BlogScreen> {
           style: const TextStyle(fontSize: 16.0),
         ),
       ),
-      body: ListView(
+      body: Column(
         children: [
-          SizedBox(height: 550, child: Markdown(data: blog?.body ?? "")),
-          Row(
-            children: [
-              IconButton(
-                onPressed: handleLikeBlog,
-                icon: Icon(
-                  Icons.favorite,
-                  color:
-                      blog!.likes.contains(userId) ? Colors.red : Colors.grey,
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Text(
+              blog!.title,
+              style: Theme.of(context).textTheme.headline5,
+            ),
+          ),
+          Expanded(child: Markdown(data: blog?.body ?? "")),
+          SizedBox(
+            height: 50,
+            child: Row(
+              children: [
+                IconButton(
+                  onPressed: handleLikeBlog,
+                  icon: Icon(
+                    Icons.favorite,
+                    color:
+                        blog!.likes.contains(userId) ? Colors.red : Colors.grey,
+                  ),
                 ),
-              ),
-              Text("${blog?.likes.length} liked this"),
-              IconButton(onPressed: () {}, icon: const Icon(Icons.comment)),
-              Text("${blog?.comments.length}"),
-            ],
+                Text("${blog?.likes.length} liked this"),
+                IconButton(
+                    onPressed: () {
+                      if (blog != null) {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => CommentScreen(
+                                blog: blog!,
+                                handleAddComment: handleAddComment),
+                          ),
+                        );
+                      }
+                    },
+                    icon: const Icon(Icons.comment)),
+                Text("${blog?.comments.length}"),
+              ],
+            ),
           )
         ],
       ),

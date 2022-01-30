@@ -97,3 +97,40 @@ Future<BlogModel> likeBlog(String blogId) async {
     comments: blog["comments"] ?? "",
   );
 }
+
+Future<BlogModel> commentBlog({
+  required String blogId,
+  required String comment,
+}) async {
+  String? accessToken = await _storage.read(key: 'accessToken');
+
+  if (accessToken == null) {
+    throw Error();
+  }
+
+  Map<String, dynamic> response = await postRequest(
+    url: "$_baseUrl/blogs/comment-blog",
+    data: <String, dynamic>{
+      "comment": comment,
+    },
+    queryParams: <String, String>{
+      "blogId": blogId,
+    },
+    accessToken: accessToken,
+  );
+
+  Map<String, dynamic> blog = response["data"]["data"];
+
+  return BlogModel(
+    body: blog["body"] ?? "",
+    category: blog["category"] ?? "",
+    city: blog["city"] ?? "",
+    isDraft: blog["isDraft"] ?? "",
+    likes: blog["likes"].map((item) => item.toString()).toList(),
+    owner: blog["owner"] ?? "",
+    title: blog["title"] ?? "",
+    id: blog["_id"] ?? "",
+    createdAt: blog["createdAt"] ?? "",
+    comments: blog["comments"] ?? "",
+  );
+}
