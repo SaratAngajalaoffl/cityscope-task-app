@@ -2,9 +2,36 @@ import 'package:cityscope/models/blog_model.dart';
 import 'package:cityscope/screens/home/blog_screen.dart';
 import 'package:cityscope/services/auth/auth_service.dart';
 import 'package:cityscope/services/core/blog_services.dart';
+import 'package:cityscope/widgets/loading_widget.dart';
 import 'package:eva_icons_flutter/eva_icons_flutter.dart';
 import 'package:dart_date/dart_date.dart';
 import 'package:flutter/material.dart';
+
+const List<String> cities = [
+  "Adilabad",
+  "Anantapur",
+  "Chittoor",
+  "Kakinada",
+  "Guntur",
+  "Hyderabad",
+  "Karimnagar",
+  "Khammam",
+  "Krishna",
+  "Kurnool",
+  "Mahbubnagar",
+  "Medak",
+  "Nalgonda",
+  "Nizamabad",
+  "Ongole",
+  "Hyderabad",
+  "Srikakulam",
+  "Nellore",
+  "Visakhapatnam",
+  "Vizianagaram",
+  "Warangal",
+  "Eluru",
+  "Kadapa",
+];
 
 class HomeScreen extends StatefulWidget {
   final void Function() getAccessToken;
@@ -19,19 +46,21 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  bool isLoading = true;
   List<BlogModel> blogs = <BlogModel>[];
+  String? selectedCity;
 
-  @override
-  void initState() {
-    getData();
-    super.initState();
-  }
+  Future<void> getData(String city) async {
+    setState(() {
+      isLoading = true;
+    });
 
-  Future<void> getData() async {
-    var data = await getDashboardData();
+    var data = await getDashboardData(city: city);
 
     setState(() {
       blogs = data;
+      selectedCity = city;
+      isLoading = false;
     });
   }
 
@@ -63,12 +92,19 @@ class _HomeScreenState extends State<HomeScreen> {
       );
     }
 
-    ;
-
     return Scaffold(
       appBar: AppBar(
         title: const Text("CityScope"),
         actions: [
+          ElevatedButton.icon(
+            onPressed: () {
+              setState(() {
+                selectedCity = null;
+              });
+            },
+            icon: const Icon(Icons.edit_location),
+            label: Text(selectedCity ?? ""),
+          ),
           IconButton(
             onPressed: () async {
               await logoutUser();
@@ -80,9 +116,24 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
-      body: ListView(
-        children: blogs.map((e) => _getBlogListItem(e)).toList(),
-      ),
+      body: selectedCity == null
+          ? SimpleDialog(
+              title: const Text('Select City'),
+              children: cities
+                  .map((city) => SimpleDialogOption(
+                        onPressed: () {
+                          getData(city);
+                        },
+                        child: Text(city),
+                      ))
+                  .toList())
+          : Container(
+              child: isLoading
+                  ? const LoadingIndicator()
+                  : ListView(
+                      children: blogs.map((e) => _getBlogListItem(e)).toList(),
+                    ),
+            ),
     );
   }
 }

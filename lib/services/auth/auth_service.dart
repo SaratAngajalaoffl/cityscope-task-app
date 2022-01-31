@@ -17,8 +17,6 @@ Future<void> registerUser({
     url: "$_baseUrl/auth/register",
   );
 
-  print("Access Token is ${response["data"]["data"]["accessToken"]}");
-
   await _storage.write(
     key: 'accessToken',
     value: response["data"]["data"]["accessToken"],
@@ -41,10 +39,6 @@ Future<void> loginUser({
     },
     url: "$_baseUrl/auth/login",
   );
-
-  print("Access Token is ${response["data"]["data"]["accessToken"]}");
-
-  print(response["data"]["data"]);
 
   await _storage.write(
     key: 'accessToken',

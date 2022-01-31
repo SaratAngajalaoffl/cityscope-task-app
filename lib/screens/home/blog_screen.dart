@@ -36,8 +36,6 @@ class _BlogScreenState extends State<BlogScreen> {
     BlogModel data = await getBlogData(widget.blogId);
     String id = await _storage.read(key: "userId") ?? "";
 
-    print(id);
-
     setState(() {
       blog = data;
       userId = id;

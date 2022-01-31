@@ -6,7 +6,7 @@ const _baseUrl = "http://192.168.1.8:8080";
 
 const _storage = FlutterSecureStorage();
 
-Future<List<BlogModel>> getDashboardData() async {
+Future<List<BlogModel>> getDashboardData({required String city}) async {
   String? accessToken = await _storage.read(key: 'accessToken');
 
   if (accessToken == null) {
@@ -15,6 +15,9 @@ Future<List<BlogModel>> getDashboardData() async {
 
   Map<String, dynamic> response = await getRequest(
     url: "$_baseUrl/blogs/get-dashboard-data",
+    queryParams: {
+      "city": city,
+    },
     accessToken: accessToken,
   );
 
